@@ -15,7 +15,7 @@
 @property (strong, nonatomic, readwrite) NSString *email;
 @property (strong, nonatomic, readwrite) NSString *firstName;
 @property (strong, nonatomic, readwrite) NSString *fullName;
-@property (weak, nonatomic, readwrite) BOOL hasAddressBookMatch;
+@property (assign, nonatomic, readwrite) BOOL hasAddressBookMatch;
 @property (strong, nonatomic, readwrite) NSString *lastName;
 @property (strong, nonatomic, readwrite) NSString *middleName;
 @property (strong, nonatomic, readwrite) NSString *phone;
@@ -43,13 +43,14 @@
   if (nil != self) {
     self.device = aDevice;
     NSMutableString *deviceName = [NSMutableString stringWithString:self.device.name];
-
-    NSArray *stringsToStrip = [NSArray arrayWithObjects:@"’s",
-                                                        @"'s",
+    unichar c = 8217;;
+    NSString *string = [[NSString alloc] initWithCharacters:&c length:1];
+    NSArray *stringsToStrip = [NSArray arrayWithObjects:@"'s",
+                               [NSString stringWithFormat:@"%@s", string],
                                                         @"ipad",
                                                         @"iphone",
                                                         @"ipod touch", nil];
-
+    
     for (NSString *stringToStrip in stringsToStrip) {
       [deviceName replaceOccurrencesOfString:stringToStrip
                                   withString:@""
@@ -64,6 +65,7 @@
 
     if ([nameTokens count] > 1) {
       self.lastName = [nameTokens lastObject];
+      if (self.lastName )
 
       if ([nameTokens count] > 2) {
         self.middleName = [[nameTokens subarrayWithRange:NSMakeRange(1, [nameTokens count] - 2)] componentsJoinedByString:@" "];
@@ -80,7 +82,7 @@
 
 - (void)populateFromAddressBook {
   ABAddressBookRef addressBook = ABAddressBookCreate();
-  NSArray *people = (__bridge_transfer NSArray *)ABAddressBookCopyPeopleWithName(addressBook, (__bridge CFStringRef)self.fullName);
+  NSArray *people = (__bridge NSArray *)ABAddressBookCopyPeopleWithName(addressBook, (__bridge CFStringRef)self.fullName);
   self.hasAddressBookMatch = ([people count] > 0);
 
   if (self.hasAddressBookMatch) {
@@ -88,7 +90,7 @@
 
     // Email
     ABMultiValueRef emailMultiValue = ABRecordCopyValue(owner, kABPersonEmailProperty);
-    NSArray *emails = (__bridge_transfer NSArray *)ABMultiValueCopyArrayOfAllValues(emailMultiValue);
+    NSArray *emails = (__bridge NSArray *)ABMultiValueCopyArrayOfAllValues(emailMultiValue);
 
     if ([emails count] > 0) {
       self.email = (NSString *)[emails objectAtIndex:0];
@@ -98,7 +100,7 @@
 
     // Phone
     ABMultiValueRef phoneMultiValue = ABRecordCopyValue(owner, kABPersonPhoneProperty);
-    NSArray *phones = (__bridge_transfer NSArray *)ABMultiValueCopyArrayOfAllValues(phoneMultiValue);
+    NSArray *phones = (__bridge NSArray *)ABMultiValueCopyArrayOfAllValues(phoneMultiValue);
 
     if ([phones count] > 0) {
       self.phone = (NSString *)[phones objectAtIndex:0];

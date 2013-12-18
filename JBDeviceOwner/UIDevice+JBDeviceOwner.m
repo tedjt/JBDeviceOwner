@@ -10,8 +10,6 @@
 #import "JBDeviceOwner.h"
 
 // Forces this .m file to be linked without needing -all_load or -force_load
-@interface FIX_CATEGORY_BUG_JBDeviceOwner @end
-@implementation FIX_CATEGORY_BUG_JBDeviceOwner @end
 
 @implementation UIDevice (JBDeviceOwner)
 
